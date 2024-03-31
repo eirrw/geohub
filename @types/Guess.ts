@@ -9,6 +9,7 @@ type Guess = {
   timedOut?: boolean
   timedOutWithGuess?: boolean
   streakLocationCode?: string
+  path?: string
 }
 
 export default Guess

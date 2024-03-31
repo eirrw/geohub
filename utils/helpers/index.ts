@@ -1,5 +1,6 @@
 export { default as createMapMarker } from './createMapMarker'
 export { default as createMapPolyline } from './createMapPolyline'
+export { default as createPathPolyline } from './createPathPolyline'
 export { default as formatDistance } from './formatDistance'
 export { default as formatLargeNumber } from './formatLargeNumber'
 export { default as formatOngoingScore } from './formatOngoingScore'

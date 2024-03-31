@@ -28,7 +28,7 @@ const updateGame = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 
   const getGameQuery = { _id: new ObjectId(gameId) }
-  const { guess, guessTime, localRound, timedOut, timedOutWithGuess, adjustedLocation, streakLocationCode } = req.body
+  const { guess, guessTime, localRound, timedOut, timedOutWithGuess, adjustedLocation, streakLocationCode, path } = req.body
 
   const game = (await collections.games?.findOne(getGameQuery)) as Game
 
@@ -138,6 +138,7 @@ const updateGame = async (req: NextApiRequest, res: NextApiResponse) => {
     timedOut,
     timedOutWithGuess,
     streakLocationCode,
+    path
   }
   game.guesses = game.guesses.concat(newGuess)
 

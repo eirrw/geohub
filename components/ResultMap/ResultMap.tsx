@@ -5,7 +5,7 @@ import { Marker } from '@components/Marker'
 import { useAppSelector } from '@redux/hook'
 import { GuessType, LocationType } from '@types'
 import { RESULT_MAP_OPTIONS } from '@utils/constants/googleMapOptions'
-import { createMapPolyline } from '@utils/helpers'
+import { createMapPolyline, createPathPolyline } from '@utils/helpers'
 import getMapsKey from '../../utils/helpers/getMapsKey'
 import { StyledResultMap } from './'
 
@@ -85,6 +85,12 @@ const ResultMap: FC<Props> = ({
       for (let i = 0; i < actualLocations.length; i++) {
         const polyline = createMapPolyline(guessedLocations[i], actualLocations[i], map)
         polylinesRef.current.push(polyline)
+
+        if (guessedLocations[i].path) {
+          const path = google.maps.geometry.encoding.decodePath(guessedLocations[i].path as string)
+          const trace = createPathPolyline(path, map)
+          polylinesRef.current.push(trace)
+        }
       }
     } else {
       setGuessMarkers([guessedLocation])
@@ -92,6 +98,12 @@ const ResultMap: FC<Props> = ({
 
       const polyline = createMapPolyline(guessedLocation, actualLocation, map)
       polylinesRef.current.push(polyline)
+
+      if (guessedLocation.path) {
+        const path = google.maps.geometry.encoding.decodePath(guessedLocation.path)
+        const trace = createPathPolyline(path, map)
+        polylinesRef.current.push(trace)
+      }
     }
   }
 
@@ -99,7 +111,10 @@ const ResultMap: FC<Props> = ({
     <StyledResultMap>
       <div className="map">
         <GoogleMapReact
-          bootstrapURLKeys={getMapsKey(user.mapsAPIKey)}
+          bootstrapURLKeys={{
+            ...getMapsKey(user.mapsAPIKey),
+            ...{ libraries: ['geometry'] } // geometry is not loaded by default
+          }}
           center={{ lat: 0, lng: 0 }}
           zoom={2}
           yesIWantToUseGoogleMapApiInternals

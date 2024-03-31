@@ -37,6 +37,7 @@ const Streetview: FC<Props> = ({ gameData, setGameData, view, setView }) => {
   const panoramaRef = useRef<google.maps.StreetViewPanorama | null>(null)
 
   const undoLocRef = useRef<Array<LocationType>>([])
+  const traceLocRef = useRef<Array<LocationType>>([])
 
   // Initializes Streetview & loads first pano
   useEffect(() => {
@@ -118,19 +119,22 @@ const Streetview: FC<Props> = ({ gameData, setGameData, view, setView }) => {
       svPanorama.setVisible(true)
 
       undoLocRef.current = []
+      traceLocRef.current = []
     })
 
     setLoading(false)
   }
 
   const trackLocations = () => {
-    if (!panoramaRef.current) return
+    if (!panoramaRef.current || view !== 'Game') return
 
     let pos = panoramaRef.current.getPosition()
 
     if (pos == null) return
     const undo = undoLocRef.current
+    const trace = traceLocRef.current
     const loc: LocationType = {'lat': pos.lat(), 'lng': pos.lng()}
+
     const compareLocs = (loc1?: LocationType, loc2?: LocationType): boolean => {
       if (!loc1 || !loc2 ) return false
 
@@ -139,6 +143,7 @@ const Streetview: FC<Props> = ({ gameData, setGameData, view, setView }) => {
 
     // don't store repeated movements (e.g. return to start)
     if (undo.length < 1 || !compareLocs(loc, undo.at(-1))) undo.push(loc)
+    if (trace.length < 1 || !compareLocs(loc, trace.at(-1))) trace.push(loc)
   }
 
   const handleSubmitGuess = async (timedOut?: boolean) => {
@@ -147,6 +152,8 @@ const Streetview: FC<Props> = ({ gameData, setGameData, view, setView }) => {
         return showToast('error', 'Something went wrong')
       }
 
+      const path = google.maps.geometry.encoding.encodePath(traceLocRef.current)
+
       const body = {
         guess: currGuess || { lat: 0, lng: 0 },
         guessTime: (new Date().getTime() - game.startTime) / 1000,
@@ -154,6 +161,7 @@ const Streetview: FC<Props> = ({ gameData, setGameData, view, setView }) => {
         timedOut,
         timedOutWithGuess: currGuess !== null,
         streakLocationCode: countryStreakGuess.toLowerCase(),
+        path,
       }
 
       const res = await mailman(`games/${gameData._id}`, 'PUT', JSON.stringify(body))
