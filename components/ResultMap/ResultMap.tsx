@@ -113,7 +113,7 @@ const ResultMap: FC<Props> = ({
         <GoogleMapReact
           bootstrapURLKeys={{
             ...getMapsKey(user.mapsAPIKey),
-            ...{ libraries: ['geometry'] } // geometry is not loaded by default
+            ...{ libraries: ['geometry'] } // geometry is not loaded by default, needed for path tracing
           }}
           center={{ lat: 0, lng: 0 }}
           zoom={2}
